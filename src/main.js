@@ -2,6 +2,8 @@ const { app, BrowserWindow, session, ipcMain, nativeTheme } = require('electron'
 const path = require('path');
 const Store = require('electron-store').default;
 
+app.setAppUserModelId('com.github.joshrod94.Google-Messages-App');
+
 const store = new Store();
 let mainWindow;
 
@@ -9,6 +11,7 @@ app.whenReady().then(() => {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
+        icon: path.join(__dirname, 'icon_transparent.ico'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'), // Use a Preload script for IPC communication
             nodeIntegration: false, // Prevents direct access to Node.js in renderer.js (for security)

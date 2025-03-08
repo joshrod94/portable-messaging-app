@@ -4,12 +4,15 @@
   "description": "Portable Desktop App for Google Messages",
   "main": "index.js",
   "scripts": {
-     "start": "electron src/main.js"
+    "start": "electron src/main.js"
   },
   "keywords": [],
   "author": "Josh Rodriguez",
   "license": "ISC",
   "devDependencies": {
     "electron": "^35.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.1"
   }
 }

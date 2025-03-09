@@ -7,14 +7,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleSentAudio: (enabled) => ipcRenderer.send('toggle-sent-audio', enabled),
     requestSentAudioSetting: () => ipcRenderer.send('request-sent-audio-setting'),
     onSentAudioSetting: (callback) => ipcRenderer.on('sent-audio-setting', (_, enabled) => callback(enabled)),
+    toggleBubbleAudio: (enabled) => ipcRenderer.send('toggle-bubble-audio', enabled),
+    requestBubbleAudioSetting: () => ipcRenderer.send('request-bubble-audio-setting'),
+    onBubbleAudioSetting: (callback) => ipcRenderer.on('bubble-audio-setting', (_, enabled) => callback(enabled)),
+    observeIncomingMessages: () => observeIncomingMessages(),
+    playBubbleSound: () => playBubbleSound(),
 });
 
 const sentAudio = new Audio();
 
-// Set audio path correctly via IPC from main
-ipcRenderer.on('set-audio-path', (_, audioPath) => {
+// Receive sent sound path from main.js
+ipcRenderer.on('set-sent-audio-path', (_, audioPath) => {
     sentAudio.src = audioPath;
-    console.log("✅ Audio path set:", audioPath);
+    //console.log("✅ Audio path set:", audioPath);
+});
+
+const bubbleAudio = new Audio();
+
+// Receive bubble sound path from main.js
+ipcRenderer.on('set-bubble-audio-path', (_, audioPath) => {
+    bubbleAudio.src = audioPath;
+    //console.log("✅ Bubble audio loaded:", audioPath);
 });
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -100,4 +113,83 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 //----------Sent Audio Settings End----------
+// ----------- Received Message Sound Logic ----------- //
+// Bubble Audio Toggle
+const bubbleAudioToggleButton = document.createElement('button');
+bubbleAudioToggleButton.style.border = 'solid 1px orange';
+bubbleAudioToggleButton.style.background = 'transparent';
+bubbleAudioToggleButton.style.cursor = 'pointer';
+bubbleAudioToggleButton.style.fontSize = '16px';
+bubbleAudioToggleButton.style.color = 'orange';
+settingsContainer.appendChild(bubbleAudioToggleButton);
+
+let bubbleAudioEnabled = true;
+ipcRenderer.send('request-bubble-audio-setting');
+
+ipcRenderer.on('bubble-audio-setting', (_, enabled) => {
+    bubbleAudioEnabled = enabled;
+    bubbleAudioToggleButton.textContent = enabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
+});
+
+bubbleAudioToggleButton.addEventListener('click', () => {
+    bubbleAudioEnabled = !bubbleAudioEnabled;
+    ipcRenderer.send('toggle-bubble-audio', bubbleAudioEnabled);
+    bubbleAudioToggleButton.textContent = bubbleAudioEnabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
+});
+
+    // ✅ Play Bubble Sound
+    const playBubbleSound = () => {
+    if (bubbleAudioEnabled && bubbleAudio.src) {
+        bubbleAudio.currentTime = 0;
+        bubbleAudio.play().catch(() => {});
+    }
+};
+
+    let messageObserver = null;
+    let retryTimeout = null;
+    let isAppFocused = true; // Track app focus state
+
+    // ✅ Listen for app focus/blur events from the main process
+    ipcRenderer.on('window-focus', () => {
+        isAppFocused = true;
+    });
+    
+    ipcRenderer.on('window-blur', () => {
+        isAppFocused = false;
+    });
+
+    // ✅ Watch for Incoming Messages
+    const observeIncomingMessages = () => {
+        const parentContainer = document.querySelector('[data-e2e-message-wrapper]')?.parentNode;
+    
+        if (!parentContainer) {
+            retryTimeout = setTimeout(observeIncomingMessages, 2000);
+            return;
+        }
+    
+        if (messageObserver) return; // Prevent duplicate observers
+    
+        messageObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1 && node.matches('mws-message-wrapper[is-outgoing="false"][is-unread="true"]')) {
+                        if (isAppFocused) {
+                            playBubbleSound();
+                        }
+                    }
+                });
+            });
+        });
+
+        messageObserver.observe(parentContainer, { childList: true, subtree: true });
+
+        if (retryTimeout) {
+            clearTimeout(retryTimeout);
+            retryTimeout = null;
+        }
+    };
+    // Start observing once the page is loaded
+    observeIncomingMessages();
+// ----------- Received Message Sound Logic End ----------- //
+
 });

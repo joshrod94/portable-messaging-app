@@ -31,21 +31,43 @@ app.whenReady().then(() => {
         await persistSession.cookies.flushStore();
     });
 
+    // Detect when the window is focused
+    mainWindow.on('focus', () => {
+        mainWindow.webContents.send('window-focus');
+    });
+
+    // Detect when the window is blurred (user switches apps)
+    mainWindow.on('blur', () => {
+        mainWindow.webContents.send('window-blur');
+    });
+
+    // Detect when the window is minimized
+    mainWindow.on('minimize', () => {
+        mainWindow.webContents.send('window-blur');
+    });
+
+    // Detect when the window is restored from minimize
+    mainWindow.on('restore', () => {
+        mainWindow.webContents.send('window-focus');
+    });
+
     // Send initial theme and audio settings once page loads
     mainWindow.webContents.once('did-finish-load', () => {
         const savedTheme = store.get('theme', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
         nativeTheme.themeSource = savedTheme;
 
         mainWindow.webContents.send('theme-status', savedTheme);
-        console.log("✅ Theme loaded:", savedTheme);
 
         const sentAudioEnabled = store.get('sentAudioEnabled', true);
         mainWindow.webContents.send('sent-audio-setting', sentAudioEnabled);
-        console.log("✅ Sent audio setting:", sentAudioEnabled);
 
-        const audioPath = `file://${path.join(__dirname, 'assets', 'sent.mp3')}`;
-        mainWindow.webContents.send('set-audio-path', audioPath);
-        console.log("✅ Audio path sent:", audioPath);
+        const sentAudioPath = `file://${path.join(__dirname, 'assets', 'sent.mp3')}`;
+        mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
+        //console.log("✅ Sent Audio path:", sentAudioPath);
+
+        const bubbleAudioPath = `file://${path.join(__dirname, 'assets', 'bubble.mp3')}`;
+        mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
+        //console.log("✅ Receive bubble audio path:", bubbleAudioPath);
     });
 
     // Theme toggle handler
@@ -54,7 +76,6 @@ app.whenReady().then(() => {
         nativeTheme.themeSource = newTheme;
         store.set('theme', newTheme);
         mainWindow.webContents.send('theme-status', newTheme);
-        console.log("✅ Theme toggled to:", newTheme);
     });
 
     ipcMain.on('request-initial-theme', () => {
@@ -65,17 +86,26 @@ app.whenReady().then(() => {
     ipcMain.on('toggle-sent-audio', (_, enabled) => {
         store.set('sentAudioEnabled', enabled);
         mainWindow.webContents.send('sent-audio-setting', enabled);
-        console.log("✅ Sent audio toggled to:", enabled);
     });
 
     ipcMain.on('request-sent-audio-setting', () => {
         const enabled = store.get('sentAudioEnabled', true);
         mainWindow.webContents.send('sent-audio-setting', enabled);
-        console.log("✅ Initial sent audio setting:", enabled);
+    });
+
+    // Handle Bubble Audio Toggle
+    ipcMain.on('toggle-bubble-audio', (_, enabled) => {
+        store.set('bubble-audio-enabled', enabled);
+        mainWindow.webContents.send('bubble-audio-setting', enabled);
+    });
+    
+    ipcMain.on('request-bubble-audio-setting', () => {
+        const bubbleAudioEnabled = store.get('bubble-audio-enabled', true);
+        mainWindow.webContents.send('bubble-audio-setting', bubbleAudioEnabled);
     });
 
     // Uncomment below to debug with DevTools
-    // mainWindow.webContents.openDevTools();
+     //mainWindow.webContents.openDevTools();
 });
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {

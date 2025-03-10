@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleBubbleAudio: (enabled) => ipcRenderer.send('toggle-bubble-audio', enabled),
     requestBubbleAudioSetting: () => ipcRenderer.send('request-bubble-audio-setting'),
     onBubbleAudioSetting: (callback) => ipcRenderer.on('bubble-audio-setting', (_, enabled) => callback(enabled)),
+    toggleNotificationAudio: (enabled) => ipcRenderer.send('toggle-notification-audio', enabled),
+    requestNotificationAudioSetting: () => ipcRenderer.send('request-notification-audio-setting'),
+    onNotificationAudioSetting: (callback) => ipcRenderer.on('notification-audio-setting', (_, enabled) => callback(enabled)),
     observeIncomingMessages: () => observeIncomingMessages(),
     playBubbleSound: () => playBubbleSound(),
 });
@@ -19,7 +22,7 @@ const sentAudio = new Audio();
 // Receive sent sound path from main.js
 ipcRenderer.on('set-sent-audio-path', (_, audioPath) => {
     sentAudio.src = audioPath;
-    //console.log("✅ Audio path set:", audioPath);
+    //console.log("✅ Sent path loaded:", audioPath);
 });
 
 const bubbleAudio = new Audio();
@@ -29,6 +32,14 @@ ipcRenderer.on('set-bubble-audio-path', (_, audioPath) => {
     bubbleAudio.src = audioPath;
     //console.log("✅ Bubble audio loaded:", audioPath);
 });
+
+const notificationAudio = new Audio();
+
+ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
+    notificationAudio.src = audioPath;
+    //console.log("✅ Notification audio loaded:", audioPath);
+});
+
 
 window.addEventListener('DOMContentLoaded', () => {
     const settingsContainer = document.createElement('div');
@@ -114,36 +125,36 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 //----------Sent Audio Settings End----------
 // ----------- Received Message Sound Logic ----------- //
-// Bubble Audio Toggle
-const bubbleAudioToggleButton = document.createElement('button');
-bubbleAudioToggleButton.style.border = 'solid 1px orange';
-bubbleAudioToggleButton.style.background = 'transparent';
-bubbleAudioToggleButton.style.cursor = 'pointer';
-bubbleAudioToggleButton.style.fontSize = '16px';
-bubbleAudioToggleButton.style.color = 'orange';
-settingsContainer.appendChild(bubbleAudioToggleButton);
+    // Bubble Audio Toggle
+    const bubbleAudioToggleButton = document.createElement('button');
+    bubbleAudioToggleButton.style.border = 'solid 1px orange';
+    bubbleAudioToggleButton.style.background = 'transparent';
+    bubbleAudioToggleButton.style.cursor = 'pointer';
+    bubbleAudioToggleButton.style.fontSize = '16px';
+    bubbleAudioToggleButton.style.color = 'orange';
+    settingsContainer.appendChild(bubbleAudioToggleButton);
 
-let bubbleAudioEnabled = true;
-ipcRenderer.send('request-bubble-audio-setting');
+    let bubbleAudioEnabled = true;
+    ipcRenderer.send('request-bubble-audio-setting');
 
-ipcRenderer.on('bubble-audio-setting', (_, enabled) => {
-    bubbleAudioEnabled = enabled;
-    bubbleAudioToggleButton.textContent = enabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
-});
+    ipcRenderer.on('bubble-audio-setting', (_, enabled) => {
+        bubbleAudioEnabled = enabled;
+        bubbleAudioToggleButton.textContent = enabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
+    });
 
-bubbleAudioToggleButton.addEventListener('click', () => {
-    bubbleAudioEnabled = !bubbleAudioEnabled;
-    ipcRenderer.send('toggle-bubble-audio', bubbleAudioEnabled);
-    bubbleAudioToggleButton.textContent = bubbleAudioEnabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
-});
+    bubbleAudioToggleButton.addEventListener('click', () => {
+        bubbleAudioEnabled = !bubbleAudioEnabled;
+        ipcRenderer.send('toggle-bubble-audio', bubbleAudioEnabled);
+        bubbleAudioToggleButton.textContent = bubbleAudioEnabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
+    });
 
     // ✅ Play Bubble Sound
     const playBubbleSound = () => {
-    if (bubbleAudioEnabled && bubbleAudio.src) {
-        bubbleAudio.currentTime = 0;
-        bubbleAudio.play().catch(() => {});
-    }
-};
+        if (bubbleAudioEnabled && bubbleAudio.src) {
+            bubbleAudio.currentTime = 0;
+            bubbleAudio.play().catch(() => {});
+        }
+    };
 
     let messageObserver = null;
     let retryTimeout = null;
@@ -191,5 +202,37 @@ bubbleAudioToggleButton.addEventListener('click', () => {
     // Start observing once the page is loaded
     observeIncomingMessages();
 // ----------- Received Message Sound Logic End ----------- //
+// ----------- Notification Sound Logic ----------- //
+    // Notification Audio Toggle
+    const notificationAudioToggleButton = document.createElement('button');
+    notificationAudioToggleButton.style.border = 'solid 1px orange';
+    notificationAudioToggleButton.style.background = 'transparent';
+    notificationAudioToggleButton.style.cursor = 'pointer';
+    notificationAudioToggleButton.style.fontSize = '16px';
+    notificationAudioToggleButton.style.color = 'orange';
+    settingsContainer.appendChild(notificationAudioToggleButton);
+
+    let notificationAudioEnabled = true;
+    ipcRenderer.send('request-notification-audio-setting');
+
+    ipcRenderer.on('notification-audio-setting', (_, enabled) => {
+        notificationAudioEnabled = enabled;
+        notificationAudioToggleButton.textContent = enabled ? 'Notification Sound ON:🔔' : 'Notification Sound OFF:🔕';
+    });
+
+    notificationAudioToggleButton.addEventListener('click', () => {
+        notificationAudioEnabled = !notificationAudioEnabled;
+        ipcRenderer.send('toggle-notification-audio', notificationAudioEnabled);
+        notificationAudioToggleButton.textContent = notificationAudioEnabled ? 'Notification Sound ON:🔔' : 'Notification Sound OFF:🔕';
+    });
+
+    // ✅ Play notification sound when a desktop notification appears
+    ipcRenderer.on('notification-received', () => {
+        if (notificationAudioEnabled && notificationAudio.src) {
+            notificationAudio.currentTime = 0;
+            notificationAudio.play().catch(() => {});
+        }
+    });
+// ----------- Notification Sound Logic End ----------- //
 
 });

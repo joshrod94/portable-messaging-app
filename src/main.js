@@ -51,6 +51,14 @@ app.whenReady().then(() => {
         mainWindow.webContents.send('window-focus');
     });
 
+    // Detect when a notification is shown and inform preload.js
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        if (permission === 'notifications') {
+            mainWindow.webContents.send('notification-received');
+        }
+        callback(true);
+    });
+
     // Send initial theme and audio settings once page loads
     mainWindow.webContents.once('did-finish-load', () => {
         const savedTheme = store.get('theme', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
@@ -68,6 +76,10 @@ app.whenReady().then(() => {
         const bubbleAudioPath = `file://${path.join(__dirname, 'assets', 'bubble.mp3')}`;
         mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
         //console.log("✅ Receive bubble audio path:", bubbleAudioPath);
+
+        const notificationAudioPath = `file://${path.join(__dirname, 'assets', 'notification.mp3')}`;
+        mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
+        //console.log("✅ Receive notification audio path:", notificationAudioPath);
     });
 
     // Theme toggle handler
@@ -102,6 +114,17 @@ app.whenReady().then(() => {
     ipcMain.on('request-bubble-audio-setting', () => {
         const bubbleAudioEnabled = store.get('bubble-audio-enabled', true);
         mainWindow.webContents.send('bubble-audio-setting', bubbleAudioEnabled);
+    });
+
+    //Handle Notification Sound Toggle
+    ipcMain.on('toggle-notification-audio', (_, enabled) => {
+        store.set('notification-audio-enabled', enabled);
+        mainWindow.webContents.send('notification-audio-setting', enabled);
+    });
+
+    ipcMain.on('request-notification-audio-setting', () => {
+        const notificationAudioEnabled = store.get('notification-audio-enabled', true);
+        mainWindow.webContents.send('notification-audio-setting', notificationAudioEnabled);
     });
 
     // Uncomment below to debug with DevTools

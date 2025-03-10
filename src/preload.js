@@ -42,28 +42,61 @@ ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
 
 
 window.addEventListener('DOMContentLoaded', () => {
+//----------Settings Sidebar---------- //
+    // Settings Sidebar Container
     const settingsContainer = document.createElement('div');
     settingsContainer.style.position = 'fixed';
-    settingsContainer.style.top = '10px';
-    settingsContainer.style.left = '10px';
-    settingsContainer.style.background = 'rgb(0, 0, 0)';
-    settingsContainer.style.borderRadius = '10px';
-    settingsContainer.style.padding = '6px';
-    settingsContainer.style.zIndex = '10000';
-    settingsContainer.style.opacity = '0';
-    settingsContainer.style.transition = 'opacity 0.3s ease';
-    settingsContainer.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
+    settingsContainer.style.top = '0';
+    settingsContainer.style.right = '-300px'; // Hidden by default
+    settingsContainer.style.width = '300px';
+    settingsContainer.style.height = '100vh';
+    settingsContainer.style.background = '#4285F4';
+    settingsContainer.style.boxShadow = '-2px 0 5px rgba(0,0,0,0.3)';
+    settingsContainer.style.padding = '20px';
+    settingsContainer.style.transition = 'right 0.3s ease';
     settingsContainer.style.display = 'flex';
     settingsContainer.style.flexDirection = 'column';
-    settingsContainer.style.alignItems = 'left';
-    settingsContainer.style.gap = '10px';
+    settingsContainer.style.alignItems = 'start';
+    settingsContainer.style.gap = '15px';
     document.body.appendChild(settingsContainer);
 
-    //Hover Area
-    window.addEventListener('mousemove', (e) => {
-        settingsContainer.style.opacity = (e.clientX < 150 && e.clientY < 150) ? '1' : '0';
+    // Add Close Button (X)
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '❌';
+    closeButton.style.alignSelf = 'flex-end';
+    closeButton.style.border = 'none';
+    closeButton.style.background = 'transparent';
+    closeButton.style.fontSize = '16px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.addEventListener('click', () => toggleSettings(false));
+    settingsContainer.appendChild(closeButton);
+
+    // Function to Toggle Sidebar
+    const toggleSettings = (show) => {
+        settingsContainer.style.right = show ? '0' : '-300px';
+    };
+
+    // Settings Button (Always Visible, Bottom Right)
+    const settingsButton = document.createElement('button');
+    settingsButton.textContent = '⚙️ Settings';
+    settingsButton.style.position = 'fixed';
+    settingsButton.style.bottom = '20px';
+    settingsButton.style.right = '20px';
+    settingsButton.style.padding = '10px 15px';
+    settingsButton.style.border = 'none';
+    settingsButton.style.background = '#B0B0B0';
+    settingsButton.style.color = 'white';
+    settingsButton.style.fontSize = '16px';
+    settingsButton.style.cursor = 'pointer';
+    settingsButton.style.borderRadius = '5px';
+    let isSettingsOpen = false;
+    settingsButton.addEventListener('click', () => {
+        isSettingsOpen = !isSettingsOpen;
+        toggleSettings(isSettingsOpen);
     });
-//----------Theme Settings----------
+    document.body.appendChild(settingsButton);
+//----------Settings Sidebar End---------- //
+//----------Theme Settings---------- //
     // Theme Toggle Button
     const themeToggleButton = document.createElement('button');
     themeToggleButton.style.border = 'solid 1px orange';
@@ -82,8 +115,8 @@ window.addEventListener('DOMContentLoaded', () => {
     themeToggleButton.addEventListener('click', () => {
         ipcRenderer.send('toggle-theme');
     });
-//----------Theme Settings End----------   
-//----------Sent Audio Settings----------
+//----------Theme Settings End---------- //
+//----------Sent Audio Settings---------- //
     // Sent Audio Toggle Button
     const sentAudioToggleButton = document.createElement('button');
     sentAudioToggleButton.style.border = 'solid 1px orange';
@@ -123,7 +156,7 @@ window.addEventListener('DOMContentLoaded', () => {
             sentAudio.play().catch(console.error);
         }
     });
-//----------Sent Audio Settings End----------
+//----------Sent Audio Settings End---------- //
 // ----------- Received Message Sound Logic ----------- //
     // Bubble Audio Toggle
     const bubbleAudioToggleButton = document.createElement('button');

@@ -21,23 +21,24 @@ const sentAudio = new Audio();
 
 // Receive sent sound path from main.js
 ipcRenderer.on('set-sent-audio-path', (_, audioPath) => {
-    sentAudio.src = audioPath;
-    //console.log("✅ Sent path loaded:", audioPath);
+    sentAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
+    console.log("Sent path loaded:", audioPath);
 });
 
 const bubbleAudio = new Audio();
 
 // Receive bubble sound path from main.js
 ipcRenderer.on('set-bubble-audio-path', (_, audioPath) => {
-    bubbleAudio.src = audioPath;
-    //console.log("✅ Bubble audio loaded:", audioPath);
+    bubbleAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
+    console.log("Bubble audio loaded:", audioPath);
 });
 
 const notificationAudio = new Audio();
 
+// Receive notification sound path from main.js
 ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
-    notificationAudio.src = audioPath;
-    //console.log("✅ Notification audio loaded:", audioPath);
+    notificationAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
+    console.log("Notification audio loaded:", audioPath);
 });
 
 
@@ -140,6 +141,10 @@ window.addEventListener('DOMContentLoaded', () => {
     sentAudioToggleButton.addEventListener('click', () => {
         sentAudioEnabled = !sentAudioEnabled;
         ipcRenderer.send('toggle-sent-audio', sentAudioEnabled);
+    
+        if (sentAudioEnabled) {
+            ipcRenderer.send('request-sent-audio-path');
+        }
     });
 
     // Sent message sound events
@@ -181,11 +186,17 @@ window.addEventListener('DOMContentLoaded', () => {
         bubbleAudioEnabled = !bubbleAudioEnabled;
         ipcRenderer.send('toggle-bubble-audio', bubbleAudioEnabled);
         bubbleAudioToggleButton.textContent = bubbleAudioEnabled ? 'Bubble Sound ON:🔊' : 'Bubble Sound OFF:🔕';
+    
+        if (bubbleAudioEnabled) {
+            ipcRenderer.send('request-bubble-audio-path');
+            ipcRenderer.send('request-bubble-audio-path');
+        }
     });
 
-    // ✅ Play Bubble Sound
+    // Play Bubble Sound
     const playBubbleSound = () => {
         if (bubbleAudioEnabled && bubbleAudio.src) {
+            bubbleAudio.load();
             bubbleAudio.currentTime = 0;
             bubbleAudio.play().catch(() => {});
         }
@@ -195,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let retryTimeout = null;
     let isAppFocused = true; // Track app focus state
 
-    // ✅ Listen for app focus/blur events from the main process
+    // Listen for app focus/blur events from the main process
     ipcRenderer.on('window-focus', () => {
         isAppFocused = true;
     });
@@ -204,7 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
         isAppFocused = false;
     });
 
-    // ✅ Watch for Incoming Messages
+    // Watch for Incoming Messages
     const observeIncomingMessages = () => {
         const parentContainer = document.querySelector('[data-e2e-message-wrapper]')?.parentNode;
     
@@ -256,12 +267,15 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     notificationAudioToggleButton.addEventListener('click', () => {
-        notificationAudioEnabled = !notificationAudioEnabled;
-        ipcRenderer.send('toggle-notification-audio', notificationAudioEnabled);
-        notificationAudioToggleButton.textContent = notificationAudioEnabled ? 'Notification Sound ON:🔔' : 'Notification Sound OFF:🔕';
-    });
+    notificationAudioEnabled = !notificationAudioEnabled;
+    ipcRenderer.send('toggle-notification-audio', notificationAudioEnabled);
 
-    // ✅ Play notification sound when a desktop notification appears
+    if (notificationAudioEnabled) {
+        ipcRenderer.send('request-notification-audio-path');
+    }
+});
+
+    // Play notification sound when a desktop notification appears
     ipcRenderer.on('notification-received', () => {
         if (notificationAudioEnabled && notificationAudio.src) {
             notificationAudio.currentTime = 0;

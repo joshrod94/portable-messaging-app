@@ -1,5 +1,6 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme, shell } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const Store = require('electron-store').default;
 
 app.setAppUserModelId('com.github.joshrod94.Google-Messages-App');
@@ -8,6 +9,18 @@ const store = new Store();
 let mainWindow;
 
 app.whenReady().then(() => {
+
+    // Register Secure Custom Protocol for MP3 Files
+    protocol.registerFileProtocol('audio-protocol', (request, callback) => {
+        const filePath = request.url.replace('audio-protocol://getAudioFile/', '');
+        try {
+            return callback({ path: filePath });
+        } catch (error) {
+            console.error("Failed to load audio:", error);
+            return callback({ error: -6 }); // Error -6: FILE_NOT_FOUND
+        }
+    });
+    
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
@@ -16,7 +29,8 @@ app.whenReady().then(() => {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
-            webSecurity: false,
+            webSecurity: true,
+            allowRunningInsecureContent: false
         }
     });
 
@@ -68,18 +82,32 @@ app.whenReady().then(() => {
 
         const sentAudioEnabled = store.get('sentAudioEnabled', true);
         mainWindow.webContents.send('sent-audio-setting', sentAudioEnabled);
+        ipcMain.on('request-sent-audio-path', () => {
+            const sentAudioPath = path.resolve(__dirname, 'assets', 'sent.mp3');
+            mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
+        });
+        
 
-        const sentAudioPath = `file://${path.join(__dirname, 'assets', 'sent.mp3')}`;
+        const sentAudioPath = path.resolve(__dirname, 'assets', 'sent.mp3');
         mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
         //console.log("✅ Sent Audio path:", sentAudioPath);
 
-        const bubbleAudioPath = `file://${path.join(__dirname, 'assets', 'bubble.mp3')}`;
+        const bubbleAudioPath = path.resolve(__dirname, 'assets', 'bubble.mp3');
         mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
         //console.log("✅ Receive bubble audio path:", bubbleAudioPath);
-
-        const notificationAudioPath = `file://${path.join(__dirname, 'assets', 'notification.mp3')}`;
+        ipcMain.on('request-bubble-audio-path', () => {
+            const bubbleAudioPath = path.resolve(__dirname, 'assets', 'bubble.mp3');
+            mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
+        });
+        
+        const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
         mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
         //console.log("✅ Receive notification audio path:", notificationAudioPath);
+        ipcMain.on('request-notification-audio-path', () => {
+            const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
+            mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
+        });
+
     });
 
     // Theme toggle handler
@@ -128,7 +156,7 @@ app.whenReady().then(() => {
     });
 
     // Uncomment below to debug with DevTools
-     //mainWindow.webContents.openDevTools();
+     mainWindow.webContents.openDevTools();
     
     // Intercept links & open in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {

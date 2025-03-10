@@ -24,7 +24,7 @@ app.whenReady().then(() => {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
-        icon: path.join(__dirname, 'icon_transparent.ico'),
+        icon: path.resolve(__dirname, 'assets', 'icon_transparent.ico'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,

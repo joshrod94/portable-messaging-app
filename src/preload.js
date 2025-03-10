@@ -22,7 +22,7 @@ const sentAudio = new Audio();
 // Receive sent sound path from main.js
 ipcRenderer.on('set-sent-audio-path', (_, audioPath) => {
     sentAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    console.log("Sent path loaded:", audioPath);
+    //console.log("Sent path loaded:", audioPath);
 });
 
 const bubbleAudio = new Audio();
@@ -30,7 +30,7 @@ const bubbleAudio = new Audio();
 // Receive bubble sound path from main.js
 ipcRenderer.on('set-bubble-audio-path', (_, audioPath) => {
     bubbleAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    console.log("Bubble audio loaded:", audioPath);
+    //console.log("Bubble audio loaded:", audioPath);
 });
 
 const notificationAudio = new Audio();
@@ -38,7 +38,7 @@ const notificationAudio = new Audio();
 // Receive notification sound path from main.js
 ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
     notificationAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    console.log("Notification audio loaded:", audioPath);
+    //console.log("Notification audio loaded:", audioPath);
 });
 
 

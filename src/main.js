@@ -24,7 +24,7 @@ app.whenReady().then(() => {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
-        icon: path.resolve(__dirname, 'assets', 'icon_transparent.ico'),
+        icon: path.resolve(__dirname, 'assets', 'Messenger.ico'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -156,7 +156,7 @@ app.whenReady().then(() => {
     });
 
     // Uncomment below to debug with DevTools
-     mainWindow.webContents.openDevTools();
+     //mainWindow.webContents.openDevTools();
     
     // Intercept links & open in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {

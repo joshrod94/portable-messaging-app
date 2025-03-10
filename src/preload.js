@@ -85,6 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
     settingsButton.style.position = 'fixed';
     settingsButton.style.bottom = '20px';
     settingsButton.style.right = '20px';
+    settingsButton.style.zIndex = '10003'; 
     settingsButton.style.padding = '10px 15px';
     settingsButton.style.border = 'none';
     settingsButton.style.background = '#B0B0B0';

@@ -30,7 +30,8 @@ app.whenReady().then(() => {
             nodeIntegration: false,
             contextIsolation: true,
             webSecurity: true,
-            allowRunningInsecureContent: false
+            allowRunningInsecureContent: false,
+            devTools: false,
         }
     });
 

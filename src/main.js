@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store').default;
 
@@ -129,6 +129,20 @@ app.whenReady().then(() => {
 
     // Uncomment below to debug with DevTools
      //mainWindow.webContents.openDevTools();
+    
+    // Intercept links & open in default browser
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' }; // Prevents Electron from opening a new window
+    });
+
+    // Ensure ALL link clicks open in default browser
+    mainWindow.webContents.on('will-navigate', (event, url) => {
+        if (!url.startsWith('https://messages.google.com')) { 
+            event.preventDefault(); // Prevent Electron from navigating
+            shell.openExternal(url); // Open in system browser
+        }
+    });
 });
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {

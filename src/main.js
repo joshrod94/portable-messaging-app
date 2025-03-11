@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store').default;
 
-app.setAppUserModelId('com.github.joshrod94.Google-Messages-App');
+app.setAppUserModelId('com.github.joshrod94.portable-messaging-app');
 
 const store = new Store();
 let mainWindow;

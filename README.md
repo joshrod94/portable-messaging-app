@@ -1,6 +1,15 @@
-# Google Messages Portable App for Windows
+# Portable Windows App for Google Messages
 
 A **standalone desktop app** for **Google Messages** built with **Electron**. This app provides a smooth experience with additional features such as **theme toggling**, **custom notifications**, **audio alerts**, and **persistent login**.
+
+**🚨 Disclaimer 🚨**
+
+⚠️ This project is NOT affiliated with Google LLC.
+⚠️ Google Messages is a trademark of Google LLC.
+⚠️ This is an unofficial, open-source wrapper for Google Messages on desktop.
+
+🔹 Use at your own risk. Google may update or change their services at any time, which could impact the functionality of this app.
+🔹 This project does NOT modify Google Messages. It simply provides a standalone desktop experience.
 
 ## 🚀 Features
 

@@ -34,7 +34,7 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 ### 1️⃣ Clone the Repository:
 ```sh
  git clone https://github.com/joshrod94/portable-messaging-app.git
- cd google-messages-app
+ cd portable-messaging-app
 ```
 
 ### 2️⃣ Install Dependencies:

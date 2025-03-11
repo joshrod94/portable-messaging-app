@@ -16,6 +16,7 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 - ✅ **Windows Notifications**: Plays notification sounds.
 - ✅ **External Links**: Opens links in the system’s default browser.
 - ✅ **Developer Tools Disabled**: Enhances security.
+- ✅ **Deletes all data when you "Unpair"**: Makes sure there's no old data left over and gives you a fresh restart for security reasons.
 
 ---
 

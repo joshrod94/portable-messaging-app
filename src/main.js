@@ -87,7 +87,6 @@ app.whenReady().then(() => {
             const sentAudioPath = path.resolve(__dirname, 'assets', 'sent.mp3');
             mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
         });
-        
 
         const sentAudioPath = path.resolve(__dirname, 'assets', 'sent.mp3');
         mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
@@ -108,7 +107,6 @@ app.whenReady().then(() => {
             const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
             mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
         });
-
     });
 
     // Theme toggle handler
@@ -155,9 +153,6 @@ app.whenReady().then(() => {
         const notificationAudioEnabled = store.get('notification-audio-enabled', true);
         mainWindow.webContents.send('notification-audio-setting', notificationAudioEnabled);
     });
-
-    // Uncomment below to debug with DevTools
-     //mainWindow.webContents.openDevTools();
     
     // Intercept links & open in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -170,9 +165,41 @@ app.whenReady().then(() => {
         if (!url.startsWith('https://messages.google.com')) { 
             event.preventDefault(); // Prevent Electron from navigating
             shell.openExternal(url); // Open in system browser
+            }
+        });
+    });
+    // ----------- Clear App Data on Unpair ----------- //
+    ipcMain.on('clear-app-data', async () => {
+        try {
+            const persistSession = session.fromPartition('persist:google-messages');
+
+            // **Enable DevTools Protocol**
+            const wc = mainWindow.webContents;
+            await wc.debugger.attach("1.3");
+
+            // **Send the exact DevTools Command:**
+            await wc.debugger.sendCommand("Storage.clearDataForOrigin", {
+                origin: "https://messages.google.com",
+                storageTypes: "all"
+            });
+
+            // **Detach Debugger to Free Resources**
+            await wc.debugger.detach();
+
+            // **Quit the App After Data is Fully Cleared**
+            setTimeout(() => {
+                app.quit();
+            }, 1500); 
+
+        } catch (error) {
+            console.error("Error clearing app data:", error);
         }
     });
-});
+    // ----------- Clear App Data on Unpair End ----------- //
+    
+    // Uncomment below to debug with DevTools
+    //mainWindow.webContents.openDevTools();
+
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit();

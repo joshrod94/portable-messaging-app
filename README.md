@@ -41,6 +41,10 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 ```sh
  npm install
 ```
+### If you encounter any missing packages, ensure Electron and Electron Store are installed:
+```
+npm install electron electron-store
+```
 
 ### 3️⃣ Run the App:
 ```sh
@@ -107,7 +111,7 @@ This project is **open-source** under the **MIT License**.
 ---
 
 ## 💬 Questions?
-Feel free to [open an issue](https://github.com/YOUR_GITHUB/google-messages-app/issues)!
+Feel free to [open an issue](https://github.com/joshrod94/portable-messaging-app/issues)!
 
 **Enjoy using Google Messages on Windows!** 🎉
 

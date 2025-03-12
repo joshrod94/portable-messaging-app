@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol, URL } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store').default;
@@ -161,12 +161,20 @@ app.whenReady().then(() => {
     });
 
     // Ensure ALL link clicks open in default browser
+    const { URL } = require('url'); // Import URL module
+
     mainWindow.webContents.on('will-navigate', (event, url) => {
-        if (!url.startsWith('https://messages.google.com')) { 
-            event.preventDefault(); // Prevent Electron from navigating
-            shell.openExternal(url); // Open in system browser
+        try {
+            const parsedUrl = new URL(url); // Parse the URL properly
+
+            if (parsedUrl.hostname !== 'messages.google.com') { 
+                event.preventDefault(); // Prevent Electron from navigating
+                shell.openExternal(url); // Open in system browser
             }
-        });
+        } catch (error) {
+            console.error("Invalid URL blocked:", url);
+            event.preventDefault();
+        }
     });
     // ----------- Clear App Data on Unpair ----------- //
     ipcMain.on('clear-app-data', async () => {
@@ -203,4 +211,5 @@ app.whenReady().then(() => {
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit();
+    });
 });

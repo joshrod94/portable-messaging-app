@@ -31,7 +31,7 @@ app.whenReady().then(() => {
             contextIsolation: true,
             webSecurity: true,
             allowRunningInsecureContent: false,
-            devTools: false,
+            //devTools: false,
         }
     });
 
@@ -206,7 +206,7 @@ app.whenReady().then(() => {
     // ----------- Clear App Data on Unpair End ----------- //
     
     // Uncomment below to debug with DevTools
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {

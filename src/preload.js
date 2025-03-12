@@ -290,12 +290,11 @@ window.addEventListener('DOMContentLoaded', () => {
         const observer = new MutationObserver(() => {
             const unpairButton = document.querySelector('button[data-e2e-action-button-confirm]');
 
-            if (unpairButton) {
-                observer.disconnect(); // Stop observing after finding the button
-
+            if (unpairButton && unpairButton.closest('.mat-mdc-dialog-container')?.querySelector('.mat-mdc-dialog-title')?.textContent?.includes("Unpair this device?")) {
+                
                 unpairButton.addEventListener('click', () => {
-                    ipcRenderer.send('clear-app-data'); // Notify main process
-                });
+                    ipcRenderer.send('clear-app-data');
+                }, { once: true });
             }
         });
 

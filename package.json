@@ -25,6 +25,10 @@
     "directories": {
       "output": "dist"
     },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
     "win": {
       "icon": "src/assets/Messenger_256.ico",
       "target": [

@@ -26,7 +26,7 @@
       "output": "dist"
     },
     "win": {
-      "icon": "src/assets/Messenger.ico",
+      "icon": "src/assets/Messenger_256.ico",
       "target": [
         {
           "target": "portable",

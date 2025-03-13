@@ -11,9 +11,11 @@
   "keywords": [],
   "author": "Josh Rodriguez / joshrod94",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "electron": "^35.0.1",
-    "electron-builder": "^24.13.3",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
     "electron-store": "^10.0.1",
     "sound-play": "^1.1.0"
   },
@@ -26,10 +28,13 @@
     },
     "files": [
       "src/**/*",
-      "!**/node_modules/*",
       "package.json",
       "license.txt",
       "readme.md"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "src/assets/*.mp3"
     ],
     "extraResources": [
       {
@@ -41,19 +46,16 @@
         ]
       }
     ],
-    "asar": false, 
     "win": {
       "icon": "src/assets/Messenger_256.ico",
       "target": [
         {
           "target": "portable",
           "arch": [
-            "x64",
-            "ia32"
+            "x64"
           ]
         }
       ]
     }
   }
 }
-

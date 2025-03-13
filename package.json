@@ -11,12 +11,11 @@
   "keywords": [],
   "author": "Josh Rodriguez / joshrod94",
   "license": "MIT",
-  "devDependencies": {
-    "electron": "^35.0.1",
-    "electron-builder": "^24.13.3"
-  },
   "dependencies": {
-    "electron-store": "^10.0.1"
+    "electron": "^35.0.1",
+    "electron-builder": "^24.13.3",
+    "electron-store": "^10.0.1",
+    "sound-play": "^1.1.0"
   },
   "build": {
     "appId": "com.joshrod94.portable-messaging-app",
@@ -36,10 +35,13 @@
       {
         "from": "src/assets/",
         "to": "assets",
-        "filter": ["*.ico", "*.mp3"]
+        "filter": [
+          "*.ico",
+          "*.mp3"
+        ]
       }
     ],
-    "asar": true,
+    "asar": false, 
     "win": {
       "icon": "src/assets/Messenger_256.ico",
       "target": [
@@ -54,3 +56,4 @@
     }
   }
 }
+

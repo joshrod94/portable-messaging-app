@@ -1,6 +1,7 @@
 const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
 const path = require('path');
 const Store = require('electron-store').default;
+const sound = require('sound-play');
 
 
 app.setAppUserModelId('com.github.joshrod94.portable-messaging-app');
@@ -9,45 +10,6 @@ const store = new Store();
 let mainWindow;
 
 app.whenReady().then(() => {
-
-    // Register Secure Custom Protocol for MP3 Files
-    protocol.handle('audio-protocol', async (request) => {
-        try {
-            const audioFilePath = request.url.replace('audio-protocol://assets/', '');
-            const resolvedPath = path.join(__dirname, 'assets', audioFilePath);
-            
-            // Debug logging
-            console.log('Audio request:', {
-                requestUrl: request.url,
-                resolvedPath,
-                exists: require('fs').existsSync(resolvedPath)
-            });
-            
-            // Security check
-            if (!resolvedPath.startsWith(path.join(__dirname, 'assets'))) {
-                throw new Error('Access denied');
-            }
-            
-            // Read file as buffer instead of stream
-            const fileBuffer = await require('fs').promises.readFile(resolvedPath);
-            
-            return new Response(fileBuffer, {
-                status: 200,
-                headers: {
-                    'Content-Type': 'audio/mpeg',
-                    'Content-Length': fileBuffer.length.toString(),
-                    'Accept-Ranges': 'bytes',
-                    'Access-Control-Allow-Origin': '*'
-                }
-            });
-        } catch (error) {
-            console.error('Audio protocol error:', error);
-            return new Response('', { 
-                status: 404,
-                statusText: error.message
-            });
-        }
-    });
     
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -119,9 +81,14 @@ app.whenReady().then(() => {
         });
 
         // Simplify to just send filenames
-        mainWindow.webContents.send('set-sent-audio-path', 'sent.mp3');
-        mainWindow.webContents.send('set-bubble-audio-path', 'bubble.mp3');
-        mainWindow.webContents.send('set-notification-audio-path', 'notification.mp3');
+        const audioDir = app.isPackaged 
+            ? path.join(process.resourcesPath, 'assets') 
+            : path.join(__dirname, 'assets');
+
+        mainWindow.webContents.send('set-sent-audio-path', path.join(audioDir, 'sent.mp3'));
+        mainWindow.webContents.send('set-bubble-audio-path', path.join(audioDir, 'bubble.mp3'));
+        mainWindow.webContents.send('set-notification-audio-path', path.join(audioDir, 'notification.mp3'));
+
 
         ipcMain.on('request-sent-audio-path', () => {
             mainWindow.webContents.send('set-sent-audio-path', 'sent.mp3');
@@ -185,6 +152,19 @@ app.whenReady().then(() => {
         mainWindow.webContents.send('notification-audio-setting', notificationAudioEnabled);
     });
     
+    // Handle Audio Playback for the 3 sounds
+    ipcMain.on('play-audio', (_, filePath) => {
+        const resolvedPath = path.join(__dirname, 'assets', filePath);
+        // console.log("Playing sound:", resolvedPath);
+        sound.play(resolvedPath)
+            .then(() => {
+                // console.log("Sound played successfully");
+            })
+            .catch((err) => {
+                // console.error("Sound play error:", err);
+            });
+    });
+
     // Intercept links & open in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);

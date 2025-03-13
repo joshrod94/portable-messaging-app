@@ -13,101 +13,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleNotificationAudio: (enabled) => ipcRenderer.send('toggle-notification-audio', enabled),
     requestNotificationAudioSetting: () => ipcRenderer.send('request-notification-audio-setting'),
     onNotificationAudioSetting: (callback) => ipcRenderer.on('notification-audio-setting', (_, enabled) => callback(enabled)),
-    observeIncomingMessages: () => observeIncomingMessages(),
-    playBubbleSound: () => playBubbleSound(),
+    observeIncomingMessages: () => observeIncomingMessages()
 });
 
-// Audio setup with error handling
-const createAudioElement = (name) => {
-    const audio = new Audio();
-    
-    audio.addEventListener('error', (e) => {
-        console.error(`Error loading ${name} audio:`, {
-            error: e.target.error,
-            code: e.target.error?.code,
-            message: e.target.error?.message,
-            src: audio.src,
-            readyState: audio.readyState
-        });
-    });
-    
-    audio.addEventListener('loadstart', () => {
-        //console.log(`${name} audio loading started`);
-    });
-    
-    audio.addEventListener('loadeddata', () => {
-        //console.log(`✅ ${name} audio loaded successfully`);
-    });
-    
-    audio.addEventListener('canplaythrough', () => {
-        //console.log(`${name} audio can play through`);
-    });
-    
-    return audio;
-};
+// Set Audio Paths
+let sentAudioPath = '';
+let bubbleAudioPath = '';
+let notificationAudioPath = '';
 
-const sentAudio = createAudioElement('sent');
-const bubbleAudio = createAudioElement('bubble');
-const notificationAudio = createAudioElement('notification');
-
-// Update audio handlers with additional logging
-ipcRenderer.on('set-sent-audio-path', (_, filename) => {
-    try {
-        const url = `audio-protocol://assets/${filename}`;
-        //console.log(`Setting sent audio source to: ${url}`);
-        sentAudio.src = url;
-        // Preload the audio
-        sentAudio.load();
-    } catch (error) {
-        console.error("Error setting sent audio source:", error);
-    }
+ipcRenderer.on('set-sent-audio-path', (_, filePath) => {
+    sentAudioPath = filePath;
+    //console.log('Sent audio path set:', filePath);
 });
 
-ipcRenderer.on('set-bubble-audio-path', (_, filename) => {
-    try {
-        bubbleAudio.src = `audio-protocol://assets/${filename}`;
-        // Preload the audio
-        bubbleAudio.load();
-       // console.log("✅ Bubble audio path:", bubbleAudio.src);
-    } catch (error) {
-        console.error("Error setting bubble audio source:", error);
-    }
+ipcRenderer.on('set-bubble-audio-path', (_, filePath) => {
+    bubbleAudioPath = filePath;
+    //console.log('Bubble audio path set:', filePath);
 });
 
-ipcRenderer.on('set-notification-audio-path', async (_, filename) => {
-    try {
-        notificationAudio.src = '';  // Clear previous source
-        notificationAudio.load();    // Reset the audio element
-        
-        const url = `audio-protocol://assets/${filename}`;
-        notificationAudio.src = url;
-        
-        // Wait for the audio to be loaded
-        await new Promise((resolve, reject) => {
-            notificationAudio.addEventListener('canplaythrough', resolve, { once: true });
-            notificationAudio.addEventListener('error', reject, { once: true });
-            notificationAudio.load();
-        });
-        
-        //console.log('✅ Notification audio loaded successfully');
-    } catch (error) {
-        console.error("Error setting notification audio source:", error);
-    }
+ipcRenderer.on('set-notification-audio-path', (_, filePath) => {
+    notificationAudioPath = filePath;
+    //console.log('Notification audio path set:', filePath);
 });
-
-// Update play functions with better error handling
-const playAudio = async (audio) => {
-    try {
-        if (audio.src) {
-            await audio.play();
-        }
-    } catch (error) {
-        console.error("Error playing audio:", error);
-    }
-};
 
 window.addEventListener('DOMContentLoaded', () => {
-
 //----------Settings Sidebar---------- //
     // Settings Sidebar Container
     const settingsContainer = document.createElement('div');
@@ -217,14 +146,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', async (event) => {
         const sendButton = event.target.closest('button.send-button');
         if (sendButton && !sendButton.disabled && sentAudioEnabled) {
-            await playAudio(sentAudio);
+            ipcRenderer.send('play-audio', 'sent.mp3');
         }
     });
 
     document.body.addEventListener('keydown', async (event) => {
         const activeElement = document.activeElement;
         if (event.key === 'Enter' && activeElement.matches('textarea[data-e2e-message-input-box]') && sentAudioEnabled) {
-            await playAudio(sentAudio);
+            ipcRenderer.send('play-audio', 'sent.mp3');
         }
     });
 //----------Sent Audio Settings End---------- //
@@ -259,8 +188,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Play Bubble Sound
     const playBubbleSound = () => {
-        if (bubbleAudioEnabled && bubbleAudio.src) {
-            playAudio(bubbleAudio);
+        if (bubbleAudioEnabled) {
+            ipcRenderer.send('play-audio', 'bubble.mp3');
         }
     };
 
@@ -282,7 +211,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const parentContainer = document.querySelector('[data-e2e-message-wrapper]')?.parentNode;
     
         if (!parentContainer) {
-            retryTimeout = setTimeout(observeIncomingMessages, 2000);
+            retryTimeout = setTimeout(observeIncomingMessages, 4000);
             return;
         }
     
@@ -339,15 +268,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Play notification sound when a desktop notification appears
     ipcRenderer.on('notification-received', async () => {
-        if (notificationAudioEnabled && notificationAudio.src) {
-            try {
-                notificationAudio.currentTime = 0;
-                await notificationAudio.play();
-            } catch (error) {
-                console.error("Error playing notification sound:", error);
-                // Try to reload the audio
-                notificationAudio.load();
-            }
+        if (notificationAudioEnabled) {
+            ipcRenderer.send('play-audio', 'notification.mp3');
         }
     });
 // ----------- Notification Sound Logic End ----------- //

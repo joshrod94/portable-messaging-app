@@ -13,7 +13,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleNotificationAudio: (enabled) => ipcRenderer.send('toggle-notification-audio', enabled),
     requestNotificationAudioSetting: () => ipcRenderer.send('request-notification-audio-setting'),
     onNotificationAudioSetting: (callback) => ipcRenderer.on('notification-audio-setting', (_, enabled) => callback(enabled)),
-    observeUnpairButton: () => observeUnpairButton(),
     observeIncomingMessages: () => observeIncomingMessages(),
     playBubbleSound: () => playBubbleSound(),
 });

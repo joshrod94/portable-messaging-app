@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol, URL } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
 const path = require('path');
 const Store = require('electron-store').default;
 
@@ -162,7 +162,6 @@ app.whenReady().then(() => {
     });
 
     // Ensure ALL link clicks open in default browser
-    const { URL } = require('url'); // Import URL module
 
     mainWindow.webContents.on('will-navigate', (event, url) => {
         try {
@@ -198,7 +197,7 @@ app.whenReady().then(() => {
             // **Quit the App After Data is Fully Cleared**
             setTimeout(() => {
                 app.quit();
-            }, 1500); 
+            }, 2000); 
 
         } catch (error) {
             console.error("Error clearing app data:", error);

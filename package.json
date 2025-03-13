@@ -33,7 +33,7 @@
       {
         "from": "src/assets/",
         "to": "assets",
-        "filter": ["*.mp3", "*.ico"]
+        "filter": ["*.ico", "*.mp3"]
       }
     ],
     "win": {

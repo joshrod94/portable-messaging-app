@@ -52,7 +52,9 @@ app.whenReady().then(() => {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
-        icon: path.resolve(__dirname, 'assets', 'Messenger_256.ico'),
+        icon: app.isPackaged 
+        ? path.join(process.resourcesPath, 'assets', 'Messenger_256.ico')
+        : path.join(__dirname, 'assets', 'Messenger_256.ico'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,

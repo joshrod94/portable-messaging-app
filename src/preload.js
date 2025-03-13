@@ -17,30 +17,94 @@ contextBridge.exposeInMainWorld('electronAPI', {
     playBubbleSound: () => playBubbleSound(),
 });
 
-const sentAudio = new Audio();
+// Audio setup with error handling
+const createAudioElement = (name) => {
+    const audio = new Audio();
+    
+    audio.addEventListener('error', (e) => {
+        console.error(`Error loading ${name} audio:`, {
+            error: e.target.error,
+            code: e.target.error?.code,
+            message: e.target.error?.message,
+            src: audio.src,
+            readyState: audio.readyState
+        });
+    });
+    
+    audio.addEventListener('loadstart', () => {
+        //console.log(`${name} audio loading started`);
+    });
+    
+    audio.addEventListener('loadeddata', () => {
+        //console.log(`✅ ${name} audio loaded successfully`);
+    });
+    
+    audio.addEventListener('canplaythrough', () => {
+        //console.log(`${name} audio can play through`);
+    });
+    
+    return audio;
+};
 
-// Receive sent sound path from main.js
-ipcRenderer.on('set-sent-audio-path', (_, audioPath) => {
-    sentAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    //console.log("Sent path loaded:", audioPath);
+const sentAudio = createAudioElement('sent');
+const bubbleAudio = createAudioElement('bubble');
+const notificationAudio = createAudioElement('notification');
+
+// Update audio handlers with additional logging
+ipcRenderer.on('set-sent-audio-path', (_, filename) => {
+    try {
+        const url = `audio-protocol://assets/${filename}`;
+        //console.log(`Setting sent audio source to: ${url}`);
+        sentAudio.src = url;
+        // Preload the audio
+        sentAudio.load();
+    } catch (error) {
+        console.error("Error setting sent audio source:", error);
+    }
 });
 
-const bubbleAudio = new Audio();
-
-// Receive bubble sound path from main.js
-ipcRenderer.on('set-bubble-audio-path', (_, audioPath) => {
-    bubbleAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    //console.log("Bubble audio loaded:", audioPath);
+ipcRenderer.on('set-bubble-audio-path', (_, filename) => {
+    try {
+        bubbleAudio.src = `audio-protocol://assets/${filename}`;
+        // Preload the audio
+        bubbleAudio.load();
+       // console.log("✅ Bubble audio path:", bubbleAudio.src);
+    } catch (error) {
+        console.error("Error setting bubble audio source:", error);
+    }
 });
 
-const notificationAudio = new Audio();
-
-// Receive notification sound path from main.js
-ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
-    notificationAudio.src = `audio-protocol://getAudioFile/${audioPath}`;
-    //console.log("Notification audio loaded:", audioPath);
+ipcRenderer.on('set-notification-audio-path', async (_, filename) => {
+    try {
+        notificationAudio.src = '';  // Clear previous source
+        notificationAudio.load();    // Reset the audio element
+        
+        const url = `audio-protocol://assets/${filename}`;
+        notificationAudio.src = url;
+        
+        // Wait for the audio to be loaded
+        await new Promise((resolve, reject) => {
+            notificationAudio.addEventListener('canplaythrough', resolve, { once: true });
+            notificationAudio.addEventListener('error', reject, { once: true });
+            notificationAudio.load();
+        });
+        
+        //console.log('✅ Notification audio loaded successfully');
+    } catch (error) {
+        console.error("Error setting notification audio source:", error);
+    }
 });
 
+// Update play functions with better error handling
+const playAudio = async (audio) => {
+    try {
+        if (audio.src) {
+            await audio.play();
+        }
+    } catch (error) {
+        console.error("Error playing audio:", error);
+    }
+};
 
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -150,19 +214,17 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Sent message sound events
-    document.body.addEventListener('click', (event) => {
+    document.body.addEventListener('click', async (event) => {
         const sendButton = event.target.closest('button.send-button');
         if (sendButton && !sendButton.disabled && sentAudioEnabled) {
-            sentAudio.currentTime = 0;
-            sentAudio.play().catch(console.error);
+            await playAudio(sentAudio);
         }
     });
 
-    document.body.addEventListener('keydown', (event) => {
+    document.body.addEventListener('keydown', async (event) => {
         const activeElement = document.activeElement;
         if (event.key === 'Enter' && activeElement.matches('textarea[data-e2e-message-input-box]') && sentAudioEnabled) {
-            sentAudio.currentTime = 0;
-            sentAudio.play().catch(console.error);
+            await playAudio(sentAudio);
         }
     });
 //----------Sent Audio Settings End---------- //
@@ -198,9 +260,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Play Bubble Sound
     const playBubbleSound = () => {
         if (bubbleAudioEnabled && bubbleAudio.src) {
-            bubbleAudio.load();
-            bubbleAudio.currentTime = 0;
-            bubbleAudio.play().catch(() => {});
+            playAudio(bubbleAudio);
         }
     };
 
@@ -278,10 +338,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
     // Play notification sound when a desktop notification appears
-    ipcRenderer.on('notification-received', () => {
+    ipcRenderer.on('notification-received', async () => {
         if (notificationAudioEnabled && notificationAudio.src) {
-            notificationAudio.currentTime = 0;
-            notificationAudio.play().catch(() => {});
+            try {
+                notificationAudio.currentTime = 0;
+                await notificationAudio.play();
+            } catch (error) {
+                console.error("Error playing notification sound:", error);
+                // Try to reload the audio
+                notificationAudio.load();
+            }
         }
     });
 // ----------- Notification Sound Logic End ----------- //

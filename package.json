@@ -29,6 +29,13 @@
       "src/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "src/assets/",
+        "to": "assets",
+        "filter": ["*.mp3", "*.ico"]
+      }
+    ],
     "win": {
       "icon": "src/assets/Messenger_256.ico",
       "target": [

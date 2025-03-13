@@ -11,13 +11,41 @@ let mainWindow;
 app.whenReady().then(() => {
 
     // Register Secure Custom Protocol for MP3 Files
-    protocol.registerFileProtocol('audio-protocol', (request, callback) => {
-        const filePath = request.url.replace('audio-protocol://getAudioFile/', '');
+    protocol.handle('audio-protocol', async (request) => {
         try {
-            return callback({ path: filePath });
+            const audioFilePath = request.url.replace('audio-protocol://assets/', '');
+            const resolvedPath = path.join(__dirname, 'assets', audioFilePath);
+            
+            // Debug logging
+            console.log('Audio request:', {
+                requestUrl: request.url,
+                resolvedPath,
+                exists: require('fs').existsSync(resolvedPath)
+            });
+            
+            // Security check
+            if (!resolvedPath.startsWith(path.join(__dirname, 'assets'))) {
+                throw new Error('Access denied');
+            }
+            
+            // Read file as buffer instead of stream
+            const fileBuffer = await require('fs').promises.readFile(resolvedPath);
+            
+            return new Response(fileBuffer, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'audio/mpeg',
+                    'Content-Length': fileBuffer.length.toString(),
+                    'Accept-Ranges': 'bytes',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
         } catch (error) {
-            console.error("Failed to load audio:", error);
-            return callback({ error: -6 }); // Error -6: FILE_NOT_FOUND
+            console.error('Audio protocol error:', error);
+            return new Response('', { 
+                status: 404,
+                statusText: error.message
+            });
         }
     });
     
@@ -31,7 +59,7 @@ app.whenReady().then(() => {
             contextIsolation: true,
             webSecurity: true,
             allowRunningInsecureContent: false,
-            devTools: false,
+            //devTools: false,
         }
     });
 
@@ -88,26 +116,26 @@ app.whenReady().then(() => {
             mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
         });
 
-        const sentAudioPath = path.resolve(__dirname, 'assets', 'sent.mp3');
-        mainWindow.webContents.send('set-sent-audio-path', sentAudioPath);
-        //console.log("✅ Sent Audio path:", sentAudioPath);
+        // Simplify to just send filenames
+        mainWindow.webContents.send('set-sent-audio-path', 'sent.mp3');
+        mainWindow.webContents.send('set-bubble-audio-path', 'bubble.mp3');
+        mainWindow.webContents.send('set-notification-audio-path', 'notification.mp3');
 
-        const bubbleAudioPath = path.resolve(__dirname, 'assets', 'bubble.mp3');
-        mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
-        //console.log("✅ Receive bubble audio path:", bubbleAudioPath);
+        ipcMain.on('request-sent-audio-path', () => {
+            mainWindow.webContents.send('set-sent-audio-path', 'sent.mp3');
+            //console.log('Sent audio path requested');
+        });
+
         ipcMain.on('request-bubble-audio-path', () => {
-            const bubbleAudioPath = path.resolve(__dirname, 'assets', 'bubble.mp3');
-            mainWindow.webContents.send('set-bubble-audio-path', bubbleAudioPath);
+            mainWindow.webContents.send('set-bubble-audio-path', 'bubble.mp3');
+            //console.log('Bubble audio path requested');
+        });
+
+        ipcMain.on('request-notification-audio-path', () => {
+            mainWindow.webContents.send('set-notification-audio-path', 'notification.mp3');
+            //console.log('Notification audio path requested');
         });
         
-        const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
-        mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
-        //console.log("✅ Receive notification audio path:", notificationAudioPath);
-        ipcMain.on('request-notification-audio-path', () => {
-            const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
-            mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
-        });
-
     });
 
     // Theme toggle handler
@@ -206,7 +234,7 @@ app.whenReady().then(() => {
     // ----------- Clear App Data on Unpair End ----------- //
     
     // Uncomment below to debug with DevTools
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {

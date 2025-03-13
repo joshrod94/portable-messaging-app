@@ -1,6 +1,5 @@
 const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol, URL } = require('electron');
 const path = require('path');
-const fs = require('fs');
 const Store = require('electron-store').default;
 
 

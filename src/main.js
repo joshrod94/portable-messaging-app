@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store').default;
 
+
 app.setAppUserModelId('com.github.joshrod94.portable-messaging-app');
 
 const store = new Store();
@@ -31,7 +32,7 @@ app.whenReady().then(() => {
             contextIsolation: true,
             webSecurity: true,
             allowRunningInsecureContent: false,
-            devTools: false,
+            //devTools: false,
         }
     });
 
@@ -107,6 +108,7 @@ app.whenReady().then(() => {
             const notificationAudioPath = path.resolve(__dirname, 'assets', 'notification.mp3');
             mainWindow.webContents.send('set-notification-audio-path', notificationAudioPath);
         });
+
     });
 
     // Theme toggle handler
@@ -206,7 +208,7 @@ app.whenReady().then(() => {
     // ----------- Clear App Data on Unpair End ----------- //
     
     // Uncomment below to debug with DevTools
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // Make Sure App Quits on Close
     app.on('window-all-closed', () => {

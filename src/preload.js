@@ -44,6 +44,7 @@ ipcRenderer.on('set-notification-audio-path', (_, audioPath) => {
 
 
 window.addEventListener('DOMContentLoaded', () => {
+
 //----------Settings Sidebar---------- //
     // Settings Sidebar Container
     const settingsContainer = document.createElement('div');
@@ -304,4 +305,5 @@ window.addEventListener('DOMContentLoaded', () => {
     // Start observing when the page loads
     observeUnpairButton();
 // ----------- Unpair Detection & Data Clearing End ----------- //
+
 });

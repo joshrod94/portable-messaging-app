@@ -1,14 +1,14 @@
 {
-  "name": "google-messages-app",
+  "name": "portable-messaging-app",
   "version": "1.0.0",
   "description": "Portable Desktop App for Google Messages",
-  "main": "index.js",
+  "main": "src/main.js",
   "scripts": {
-    "start": "electron src/main.js"
+    "start": "electron ."
   },
   "keywords": [],
   "author": "Josh Rodriguez",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^35.0.1"
   },

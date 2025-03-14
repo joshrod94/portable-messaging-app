@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell } = require('electron');
 const path = require('path');
 const Store = require('electron-store').default;
 const sound = require('sound-play');

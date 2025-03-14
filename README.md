@@ -43,7 +43,10 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 ```
 ### If you encounter any missing packages, ensure Electron and Electron Store are installed:
 ```
-npm install electron electron-store
+npm install electron --save-dev
+npm install electron-store
+npm install electron-builder@26.0.11 --save-dev
+npm install sound-play
 ```
 
 ### 3️⃣ Run the App:

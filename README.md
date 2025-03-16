@@ -21,7 +21,6 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
   - Incoming message sound
   - Notification sound
 - ✅ **Settings Sidebar**: Manage features easily.
-- ✅ **Custom Secure Protocol**: Allows local audio files to load with `webSecurity: true`.
 - ✅ **Windows Notifications**: Plays notification sounds.
 - ✅ **External Links**: Opens links in the system’s default browser.
 - ✅ **Developer Tools Disabled**: Enhances security.
@@ -44,7 +43,7 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 ### If you encounter any missing packages, ensure Electron and Electron Store are installed:
 ```
 npm install electron --save-dev
-npm install electron-store
+npm install electron-store@8.1.0
 npm install electron-builder@26.0.11 --save-dev
 npm install sound-play
 ```

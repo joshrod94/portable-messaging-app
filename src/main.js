@@ -1,6 +1,6 @@
 const { app, BrowserWindow, session, ipcMain, nativeTheme, shell } = require('electron');
 const path = require('path');
-const Store = require('electron-store').default;
+const Store = require('electron-store');
 const sound = require('sound-play');
 
 

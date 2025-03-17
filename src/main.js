@@ -1,5 +1,6 @@
-const { app, BrowserWindow, session, ipcMain, nativeTheme, shell } = require('electron');
+const { app, BrowserWindow, session, ipcMain, nativeTheme, shell, protocol } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const Store = require('electron-store');
 const sound = require('sound-play');
 
@@ -9,6 +10,18 @@ const store = new Store();
 let mainWindow;
 
 app.whenReady().then(() => {
+
+    // Register a custom protocol
+    protocol.registerFileProtocol('electron-app', (request, callback) => {
+        const url = new URL(request.url);
+        if (url.hostname === 'icon') {
+        const iconPath = decodeURIComponent(url.searchParams.get('path'));
+        callback({ path: iconPath });
+        } else {
+        // Default fallback
+        callback({ error: -2 /* FAILED: FILE_NOT_FOUND */ });
+        }
+    });
     
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -18,6 +31,8 @@ app.whenReady().then(() => {
         ? path.join(process.resourcesPath, 'assets', 'Messenger_256.ico')
         : path.join(__dirname, 'assets', 'Messenger_256.ico'),
         autoHideMenuBar: true, //removes the menu bar below the tittle bar
+        frame: false, // Remove default window frame
+        titleBarStyle: 'hidden', // Hide the default title bar
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -25,7 +40,31 @@ app.whenReady().then(() => {
             webSecurity: true,
             allowRunningInsecureContent: false,
             devTools: !app.isPackaged,
+            sandbox: false,
         }
+    });
+
+    // Custom titlebar event handlers
+    ipcMain.on('titlebar-minimize', () => {
+        mainWindow.minimize();
+    });
+    
+    ipcMain.on('titlebar-toggle-maximize', () => {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
+        } else {
+            mainWindow.maximize();
+        }
+    });
+    
+    ipcMain.on('titlebar-close', () => {
+        mainWindow.close();
+    });
+    
+    ipcMain.handle('get-app-icon-path', () => {
+        return app.isPackaged 
+            ? path.join(process.resourcesPath, 'assets', 'Messenger_256.ico')
+            : path.join(__dirname, 'assets', 'Messenger_256.ico');
     });
 
     // Load Google Messages

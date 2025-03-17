@@ -23,6 +23,7 @@ A **standalone desktop app** for **Google Messages** built with **Electron**. Th
 - ✅ **Settings Sidebar**: Manage features easily.
 - ✅ **Windows Notifications**: Plays notification sounds.
 - ✅ **External Links**: Opens links in the system’s default browser.
+- ✅ **Custom Tittle Bar**: Window's default tittle bar and frame have been disabled and replaced with a custom one.
 - ✅ **Developer Tools Disabled**: Enhances security.
 - ✅ **Deletes all data when you "Unpair"**: Makes sure there's no old data left over and gives you a fresh restart for security reasons.
 

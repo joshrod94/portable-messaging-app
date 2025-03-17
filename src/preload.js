@@ -1,6 +1,12 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const customTitlebar = require('./titlebar/titlebar.js');
+
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    minimizeWindow: () => ipcRenderer.send('titlebar-minimize'),
+    maximizeWindow: () => ipcRenderer.send('titlebar-toggle-maximize'),
+    closeWindow: () => ipcRenderer.send('titlebar-close'),
+    getAppIconPath: () => ipcRenderer.invoke('get-app-icon-path'),
     toggleTheme: () => ipcRenderer.send('toggle-theme'),
     requestInitialTheme: () => ipcRenderer.send('request-initial-theme'),
     onThemeUpdate: (callback) => ipcRenderer.on('theme-status', (_, theme) => callback(theme)),
@@ -36,7 +42,32 @@ ipcRenderer.on('set-notification-audio-path', (_, filePath) => {
     //console.log('Notification audio path set:', filePath);
 });
 
+const fixContentLayout = () => {
+    // Find the content container
+    const contentContainer = document.querySelector('body');
+    if (contentContainer) {
+        contentContainer.style.padding = '0 0 24px 0';
+        contentContainer.style.overflow = 'auto';
+    }
+    
+    // Apply fixes to conversation container
+    const conversationContainer = document.querySelector('.conversation-container');
+    if (conversationContainer) {
+        conversationContainer.style.height = 'calc(100vh - 140px)';
+        conversationContainer.style.overflow = 'auto';
+    }
+};
+
+// Wait for the app to fully render before applying fixes
+setTimeout(fixContentLayout, 10);
+
+// Re-apply fixes if window is resized
+window.addEventListener('resize', fixContentLayout);
+
 window.addEventListener('DOMContentLoaded', () => {
+    // Initialize custom titlebar
+    customTitlebar.init();
+
 //----------Settings Sidebar---------- //
     // Settings Sidebar Container
     const settingsContainer = document.createElement('div');
@@ -77,22 +108,29 @@ window.addEventListener('DOMContentLoaded', () => {
     const settingsButton = document.createElement('button');
     settingsButton.textContent = '⚙️ Settings';
     settingsButton.style.position = 'fixed';
-    settingsButton.style.top = '15px';
+    settingsButton.style.top = '50px';
     settingsButton.style.left = '175px';
     settingsButton.style.zIndex = '10003'; 
     settingsButton.style.padding = '10px 15px';
     settingsButton.style.border = 'none';
     settingsButton.style.background = '#8ab4f8';
-    settingsButton.style.color = 'white';
+    settingsButton.style.color = '#000';
     settingsButton.style.fontSize = '16px';
     settingsButton.style.cursor = 'pointer';
-    settingsButton.style.borderRadius = '5px';
+    settingsButton.style.borderRadius = '20px';
     let isSettingsOpen = false;
     settingsButton.addEventListener('click', () => {
         isSettingsOpen = !isSettingsOpen;
         toggleSettings(isSettingsOpen);
     });
     document.body.appendChild(settingsButton);
+
+    // Update settings button color based on theme
+    ipcRenderer.on('theme-status', (_, theme) => {
+        settingsButton.style.color = theme === 'dark' ? '#000' : '#fff';
+        settingsButton.style.background = theme === 'dark' ? '#8ab4f8' : '#1a73e8';
+        settingsButton.style.boxShadow = theme === 'dark' ? 'none' : '0 2px 4px rgba(0,0,0,0.3)';
+    });
 //----------Settings Sidebar End---------- //
 //----------Theme Settings---------- //
     // Theme Toggle Button

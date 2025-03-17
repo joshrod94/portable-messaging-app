@@ -27,16 +27,14 @@
       "output": "dist"
     },
     "files": [
-      "src/**/*",
-      "package.json",
-      "license.txt",
-      "readme.md"
+      "src/**/*"
     ],
     "asar": false,
     "asarUnpack": [
       "src/assets/*.mp3",
       "node_modules/electron-store/**/*",
-      "node_modules/sound-play/**/*"
+      "node_modules/sound-play/**/*",
+      "src/titlebar/**/*"
     ],
     "extraResources": [
       {

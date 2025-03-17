@@ -17,6 +17,7 @@ app.whenReady().then(() => {
         icon: app.isPackaged 
         ? path.join(process.resourcesPath, 'assets', 'Messenger_256.ico')
         : path.join(__dirname, 'assets', 'Messenger_256.ico'),
+        autoHideMenuBar: true, //removes the menu bar below the tittle bar
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,

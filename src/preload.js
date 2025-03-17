@@ -45,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
     settingsContainer.style.right = '-300px'; // Hidden by default
     settingsContainer.style.width = '300px';
     settingsContainer.style.height = '100vh';
-    settingsContainer.style.background = '#4285F4';
+    settingsContainer.style.background = '#8ab4f89d';
     settingsContainer.style.boxShadow = '-2px 0 5px rgba(0,0,0,0.3)';
     settingsContainer.style.padding = '20px';
     settingsContainer.style.transition = 'right 0.3s ease';
@@ -77,12 +77,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const settingsButton = document.createElement('button');
     settingsButton.textContent = '⚙️ Settings';
     settingsButton.style.position = 'fixed';
-    settingsButton.style.bottom = '20px';
-    settingsButton.style.right = '20px';
+    settingsButton.style.top = '15px';
+    settingsButton.style.left = '175px';
     settingsButton.style.zIndex = '10003'; 
     settingsButton.style.padding = '10px 15px';
     settingsButton.style.border = 'none';
-    settingsButton.style.background = '#B0B0B0';
+    settingsButton.style.background = '#8ab4f8';
     settingsButton.style.color = 'white';
     settingsButton.style.fontSize = '16px';
     settingsButton.style.cursor = 'pointer';
@@ -147,6 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const sendButton = event.target.closest('button.send-button');
         if (sendButton && !sendButton.disabled && sentAudioEnabled) {
             ipcRenderer.send('play-audio', 'sent.mp3');
+            //console.log('Sent audio played');
         }
     });
 
@@ -154,6 +155,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const activeElement = document.activeElement;
         if (event.key === 'Enter' && activeElement.matches('textarea[data-e2e-message-input-box]') && sentAudioEnabled) {
             ipcRenderer.send('play-audio', 'sent.mp3');
+            //console.log('Sent audio played');
         }
     });
 //----------Sent Audio Settings End---------- //
@@ -223,6 +225,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (node.nodeType === 1 && node.matches('mws-message-wrapper[is-outgoing="false"][is-unread="true"]')) {
                         if (isAppFocused) {
                             playBubbleSound();
+                            //console.log('Bubble audio played');
                         }
                     }
                 });
@@ -270,6 +273,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.on('notification-received', async () => {
         if (notificationAudioEnabled) {
             ipcRenderer.send('play-audio', 'notification.mp3');
+            //console.log('Notification audio played');
         }
     });
 // ----------- Notification Sound Logic End ----------- //

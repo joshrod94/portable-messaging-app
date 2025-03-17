@@ -32,10 +32,11 @@
       "license.txt",
       "readme.md"
     ],
-    "asar": true,
+    "asar": false,
     "asarUnpack": [
       "src/assets/*.mp3",
-      "node_modules/electron-store/**/*"
+      "node_modules/electron-store/**/*",
+      "node_modules/sound-play/**/*"
     ],
     "extraResources": [
       {

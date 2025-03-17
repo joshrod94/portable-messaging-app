@@ -3,8 +3,7 @@ const path = require('path');
 const Store = require('electron-store');
 const sound = require('sound-play');
 
-
-app.setAppUserModelId('com.github.joshrod94.portable-messaging-app');
+app.setAppUserModelId('Portable Messaging App');
 
 const store = new Store();
 let mainWindow;
@@ -14,6 +13,7 @@ app.whenReady().then(() => {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
+        title: 'Portable Messaging App for Google Messages',
         icon: app.isPackaged 
         ? path.join(process.resourcesPath, 'assets', 'Messenger_256.ico')
         : path.join(__dirname, 'assets', 'Messenger_256.ico'),
@@ -23,7 +23,7 @@ app.whenReady().then(() => {
             contextIsolation: true,
             webSecurity: true,
             allowRunningInsecureContent: false,
-            devTools: false,
+            devTools: !app.isPackaged,
         }
     });
 
@@ -68,6 +68,8 @@ app.whenReady().then(() => {
 
     // Send initial theme and audio settings once page loads
     mainWindow.webContents.once('did-finish-load', () => {
+        mainWindow.setTitle('Portable Messaging App for Google Messages');
+
         const savedTheme = store.get('theme', nativeTheme.shouldUseDarkColors ? 'dark' : 'light');
         nativeTheme.themeSource = savedTheme;
 
@@ -155,13 +157,13 @@ app.whenReady().then(() => {
     // Handle Audio Playback for the 3 sounds
     ipcMain.on('play-audio', (_, filePath) => {
         const resolvedPath = path.join(__dirname, 'assets', filePath);
-        // console.log("Playing sound:", resolvedPath);
+         console.log("Playing sound:", resolvedPath);
         sound.play(resolvedPath)
             .then(() => {
-                // console.log("Sound played successfully");
+                //console.log("Sound played successfully");
             })
             .catch((err) => {
-                // console.error("Sound play error:", err);
+                //console.error("Sound play error:", err);
             });
     });
 

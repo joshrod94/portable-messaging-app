@@ -1,7 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const customTitlebar = require('./titlebar/titlebar.js');
 
-
 contextBridge.exposeInMainWorld('electronAPI', {
     minimizeWindow: () => ipcRenderer.send('titlebar-minimize'),
     maximizeWindow: () => ipcRenderer.send('titlebar-toggle-maximize'),
@@ -48,13 +47,6 @@ const fixContentLayout = () => {
     if (contentContainer) {
         contentContainer.style.padding = '0 0 24px 0';
         contentContainer.style.overflow = 'auto';
-    }
-    
-    // Apply fixes to conversation container
-    const conversationContainer = document.querySelector('.conversation-container');
-    if (conversationContainer) {
-        conversationContainer.style.height = 'calc(100vh - 140px)';
-        conversationContainer.style.overflow = 'auto';
     }
 };
 

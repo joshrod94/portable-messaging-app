@@ -33,6 +33,7 @@ app.whenReady().then(() => {
         autoHideMenuBar: true, //removes the menu bar below the tittle bar
         frame: false, // Remove default window frame
         titleBarStyle: 'hidden', // Hide the default title bar
+        roundedCorners: true, 
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -197,7 +198,7 @@ app.whenReady().then(() => {
     // Handle Audio Playback for the 3 sounds
     ipcMain.on('play-audio', (_, filePath) => {
         const resolvedPath = path.join(__dirname, 'assets', filePath);
-         console.log("Playing sound:", resolvedPath);
+         //console.log("Playing sound:", resolvedPath);
         sound.play(resolvedPath)
             .then(() => {
                 //console.log("Sound played successfully");

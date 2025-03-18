@@ -47,6 +47,7 @@
       }
     ],
     "win": {
+      "artifactName": "Portable Messaging App.${ext}",
       "icon": "src/assets/Messenger_256.ico",
       "target": [
         {

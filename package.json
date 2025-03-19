@@ -1,6 +1,6 @@
 {
   "name": "portable-messaging-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Portable Desktop App for Google Messages",
   "main": "src/main.js",
   "scripts": {

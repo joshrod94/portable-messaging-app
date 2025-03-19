@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
         settingsContainer.style.right = show ? '0' : '-300px';
     };
 
-    // Settings Button (Always Visible, Bottom Right)
+    // Settings Button (Always Visible)
     const settingsButton = document.createElement('button');
     settingsButton.textContent = '⚙️ Settings';
     settingsButton.style.position = 'fixed';
@@ -326,5 +326,28 @@ window.addEventListener('DOMContentLoaded', () => {
     // Start observing when the page loads
     observeUnpairButton();
 // ----------- Unpair Detection & Data Clearing End ----------- //
+// ----------- Image overlay for downloading----------- //
+    const observeLightboxHeader = () => {
+        const observer = new MutationObserver((mutations) => {
+            const lightboxHeader = document.querySelector('div[data-e2e-lightbox].header');
+            
+            if (lightboxHeader && !lightboxHeader.dataset.paddingApplied) {
+                // Apply 65px padding to the top
+                lightboxHeader.style.paddingTop = '65px';
+                // Mark as processed to avoid reapplying
+                lightboxHeader.dataset.paddingApplied = 'true';
+            }
+        });
+
+        // Observe the whole body for when the lightbox gets added
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true 
+        });
+    };
+
+    // Start observing for lightbox header
+    observeLightboxHeader();
+// ----------- Image overlay for downloading End ----------- //
 
 });
